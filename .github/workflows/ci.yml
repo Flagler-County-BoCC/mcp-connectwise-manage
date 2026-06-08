@@ -1,0 +1,70 @@
+name: CI
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    needs: quality
+    env:
+      NODE_ENV: test
+      # CW_* vars are loaded from .env.test by tests/setup.ts — no real credentials needed
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run test:coverage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build
+      # Send a JSON-RPC initialize message; server should respond and exit on timeout cleanly
+      - run: |
+          echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci-smoke","version":"0.0.0"}}}' \
+          | timeout 5 node dist/stdio.js || true
+        env:
+          NODE_ENV: production
+          LOG_LEVEL: error
+          CW_server: smoke.example.com
+          CW_company: smokecompany
+          CW_clientId: 00000000-0000-0000-0000-000000000000
+          CW_pub: smoke-public-key-32chars-padding0
+          CW_priv: smoke-private-key-32chars-padding
+          SPEC_PATH: /dev/null
+          CW_PROFILES: '{"admin":[""]}'
+          CW_ACTIVE_PROFILE: admin

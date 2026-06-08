@@ -1,0 +1,76 @@
+{
+  "name": "mcp-connectwise-manage",
+  "version": "0.1.6",
+  "private": false,
+  "description": "Model Context Protocol server for ConnectWise Manage (OpenAPI auto-expose)",
+  "keywords": [
+    "modelcontextprotocol",
+    "mcp",
+    "connectwise",
+    "server",
+    "cursor",
+    "claude",
+    "chatgpt"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Flagler-County-BoCC/mcp-connectwise-manage.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Flagler-County-BoCC/mcp-connectwise-manage/issues"
+  },
+  "homepage": "https://github.com/Flagler-County-BoCC/mcp-connectwise-manage#readme",
+  "type": "module",
+  "main": "dist/stdio.js",
+  "bin": {
+    "mcp-cw-manage": "dist/stdio.js"
+  },
+  "files": [
+    "dist/**",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build":            "tsc -p tsconfig.build.json",
+    "start":            "node --env-file=.env dist/stdio.js",
+    "dev":              "node --env-file=.env --import tsx/esm --watch src/stdio.ts",
+    "lint":             "eslint src tests",
+    "lint:fix":         "eslint src tests --fix",
+    "format":           "prettier --write .",
+    "format:check":     "prettier --check .",
+    "test":             "vitest run",
+    "test:watch":       "vitest",
+    "test:coverage":    "vitest run --coverage",
+    "test:integration": "vitest run tests/integration",
+    "typecheck":        "tsc --noEmit",
+    "inspect":          "npx @modelcontextprotocol/inspector node --env-file=.env dist/stdio.js",
+    "setup":            "npm run build && tsx scripts/setup.ts",
+    "uninstall":        "tsx scripts/uninstall.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.2.0",
+    "axios": "^1.7.7",
+    "pino": "^9.4.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
+    "typescript-eslint": "^8.0.0",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "pino-pretty": "^11.0.0",
+    "prettier": "^3.2.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.8"
+  }
+}
